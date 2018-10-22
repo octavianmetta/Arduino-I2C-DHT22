@@ -1,21 +1,22 @@
 #include <Arduino.h>
 #include <Wire.h>
-#define dataSize 8
-#define startingAddress 8
-#define numberOfDevices 3
-typedef union float2bytes_t   // union consists of one variable represented in a number of different ways 
+#define dataSize 8              //Ukuran data dari 2 float yang diterima         
+#define startingAddress 8       //Alamat mulai slave
+#define numberOfDevices 3       //Jumlah slave
+typedef union float2bytes_t     //Union untuk konversi float menjadi bytes. 
+                                //Union berisi satu variabel yang direpresentasikan dalam berbagai tipe data 
 { 
   float f; 
   char b[sizeof(float)]; 
 }; 
 
-byte I2C_data[dataSize]={0}; // Array untuk menerima data
-float temp[3]={0};   //Array untuk menyimpan data dari sender
-float humid[3]={0};  //Array untuk menyimpan data dari sender
+byte I2C_data[dataSize]={0};    // Array untuk menerima data
+float temp[3]={0};              //Array untuk menyimpan data dari sender
+float humid[3]={0};             //Array untuk menyimpan data dari sender
 
-float meanFunc(float value[], int size);
-float medianFunc(float value[]);
-float modusFunc(float value[]);
+float meanFunc(float value[], int size);        //Fungsi mean
+float medianFunc(float value[]);                //Fungsi median
+float modusFunc(float value[]);                 //Fungsi modus
 
 void setup() {
         Wire.begin();     // join i2c bus (address optional for master)
@@ -23,12 +24,12 @@ void setup() {
 }
 
 void loop() {
-        float2bytes_t t2f, h2f;
+        float2bytes_t t2f, h2f;         //Deklarasi untuk konversi menjadi float
         for(int i=startingAddress; i<(startingAddress+numberOfDevices); i++){      //Loop untuk akuisisi data dari sender
                 Wire.requestFrom(i, dataSize); //Alamat sender dimulai dari 8-10
                 int j=0;
                 while(Wire.available()){
-                        I2C_data[j]=Wire.read();
+                        I2C_data[j]=Wire.read();        //Terima data byte berurutan
                         j++;
                 }
 
