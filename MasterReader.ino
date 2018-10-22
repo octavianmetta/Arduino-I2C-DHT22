@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
-#define dataSize 2
+#define dataSize 8
 #define startingAddress 8
 #define numberOfDevices 3
 typedef union float2bytes_t   // union consists of one variable represented in a number of different ways 
