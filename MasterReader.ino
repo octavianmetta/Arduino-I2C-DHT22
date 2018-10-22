@@ -2,14 +2,20 @@
 #include <Wire.h>
 #define dataSize 2
 #define startingAddress 8
+#define numberOfDevices 3
+typedef union float2bytes_t   // union consists of one variable represented in a number of different ways 
+{ 
+  float f; 
+  char b[sizeof(float)]; 
+}; 
 
-int8_t I2C_data[2]={0}; // Array untuk menerima data
-int8_t temp[3]={0};   //Array untuk menyimpan data dari sender
-int8_t humid[3]={0};  //Array untuk menyimpan data dari sender
+byte I2C_data[dataSize]={0}; // Array untuk menerima data
+float temp[3]={0};   //Array untuk menyimpan data dari sender
+float humid[3]={0};  //Array untuk menyimpan data dari sender
 
-float meanFunc(int8_t value[], int size);
-int8_t medianFunc(int8_t value[]);
-int8_t modusFunc(int8_t value[]);
+float meanFunc(float value[], int size);
+float medianFunc(float value[]);
+float modusFunc(float value[]);
 
 void setup() {
         Wire.begin();     // join i2c bus (address optional for master)
@@ -17,13 +23,26 @@ void setup() {
 }
 
 void loop() {
-        for(int i=startingAddress; i<(startingAddress+3); i++) { //Loop untuk akuisisi data dari sender
-                Wire.requestFrom(i, dataSize); //Alamat sender dimulai dari 2-4
-                I2C_data[0]=Wire.read();
-                I2C_data[1]=Wire.read();
+        float2bytes_t t2f, h2f;
+        for(int i=startingAddress; i<(startingAddress+numberOfDevices); i++){      //Loop untuk akuisisi data dari sender
+                Wire.requestFrom(i, dataSize); //Alamat sender dimulai dari 8-10
+                int j=0;
+                while(Wire.available()){
+                        I2C_data[j]=Wire.read();
+                        j++;
+                }
 
-                temp[i-startingAddress]=I2C_data[0];
-                humid[i-startingAddress]=I2C_data[1];
+        t2f.b[0] = I2C_data[0];
+        t2f.b[1] = I2C_data[1];
+        t2f.b[2] = I2C_data[2];
+        t2f.b[3] = I2C_data[3];
+        temp[i-startingAddress]=t2f.f;
+    
+        h2f.b[0] = I2C_data[4];
+        h2f.b[1] = I2C_data[5];
+        h2f.b[2] = I2C_data[6];
+        h2f.b[3] = I2C_data[7];
+        humid[i-startingAddress]=h2f.f;
         }
         Serial.println("");
 
@@ -52,10 +71,10 @@ void loop() {
         delay(1000);
 }
 
-int8_t medianFunc(int8_t value[3]){
+float medianFunc(float value[3]){
 
         bool A,B,C = false; //Boolean untuk pembanding
-        int8_t median = 0; //Untuk menyimpan nilai median
+        float median = 0; //Untuk menyimpan nilai median
 
 
         if(value[0]<=value[1]) A=false;
@@ -73,7 +92,7 @@ int8_t medianFunc(int8_t value[3]){
         return(median);
 }
 
-float meanFunc(int8_t value[], int size){
+float meanFunc(float value[], int size){
         int i, sum = 0;
         double mean;
 
@@ -85,8 +104,8 @@ float meanFunc(int8_t value[], int size){
         return(mean);
 }
 
-int8_t modusFunc(int8_t value[]){
-        int8_t modus = 0; //Untuk menyimpan nilai modus
+float modusFunc(float value[]){
+        float modus = 0; //Untuk menyimpan nilai modus
 
         for(int i=0; i<3; i++) {
                 for(int j=i+1; j<3; j++) {
