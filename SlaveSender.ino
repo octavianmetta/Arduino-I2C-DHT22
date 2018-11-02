@@ -1,24 +1,24 @@
 #include "DHT.h"
 #include <Wire.h>
 #define PACKET_SIZE 8
-#define DHTPIN 2     // what digital pin we're connected to
-#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
-const byte addrSlaveI2C =  8;  // I2C Slave address of this device
+#define DHTPIN 2     		//Pin untuk DHT
+#define DHTTYPE DHT22   	// DHT 22  (AM2302), AM2321
+const byte addrSlaveI2C =  8;  	// Alamat I2C dari slave
 float temp = 0;
 float humid = 0;
 
-byte I2C_Packet[PACKET_SIZE];            // Array to hold data sent over I2C to main Arduino
-DHT dht(DHTPIN, DHTTYPE);
+byte I2C_Packet[PACKET_SIZE];           //Array yang membawa data untuk dikirimkan
+DHT dht(DHTPIN, DHTTYPE);		//Pengaturan DHT
 
 // convert float to byte array  source: http://mbed.org/forum/helloworld/topic/2053/
-typedef union float2bytes_t   // union consists of one variable represented in a number of different ways 
-{ 
-  float f; 
+typedef union float2bytes_t   	// union consists of one variable represented in a number of different ways 
+{ 				//Union untuk merepresentasikan satu variabel menjadi tipe daya yang lainnya (seperti konversi)
+  float f; 			//Pada union ini digunakan untuk konversi float menjadi array of bytes atau sebaliknya
   byte b[sizeof(float)]; 
 }; 
 
 void setup() {
-        Wire.begin(addrSlaveI2C);    // Initiate the Wire library and join the I2C bus         
+        Wire.begin(addrSlaveI2C);    //Inisialisasi I2C       
         Wire.onRequest(RequestData);
         Serial.begin(9600);
         Serial.println("DHTxx test!");
@@ -29,14 +29,14 @@ void setup() {
 void loop() {
         delay(1000);
 
-        humid = dht.readHumidity();
-        temp = dht.readTemperature();
+        humid = dht.readHumidity();	//Baca kelembapan
+        temp = dht.readTemperature();	//Baca temperatur
         // Check if any reads failed and exit early (to try again).
         if (isnan(humid) || isnan(temp)) {
                 Serial.println("Failed to read from DHT sensor!");
                 return;
         }
-        float2bytes_t t2b,h2b; 
+        float2bytes_t t2b,h2b; 		//Deklarasi untuk konversi float menjadi bytes
         t2b.f = temp;
         I2C_Packet[0] = t2b.b[0];
         I2C_Packet[1] = t2b.b[1];
