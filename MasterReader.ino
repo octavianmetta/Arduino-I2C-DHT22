@@ -3,7 +3,7 @@
 #define dataSize 8              //Ukuran data dari 2 float yang diterima         
 #define startingAddress 8       //Alamat mulai slave
 #define numberOfDevices 3       //Jumlah slave
-typedef union float2bytes_t     //Union untuk konversi float menjadi bytes. 
+typedef union float2bytes_t     //Union untuk konversi float menjadi bytes maupun sebaliknya. 
                                 //Union berisi satu variabel yang direpresentasikan dalam berbagai tipe data 
 { 
   float f; 
@@ -24,8 +24,8 @@ void setup() {
 }
 
 void loop() {
-        float2bytes_t t2f, h2f;         //Deklarasi untuk konversi menjadi float
-        for(int i=startingAddress; i<(startingAddress+numberOfDevices); i++){      //Loop untuk akuisisi data dari sender
+        float2bytes_t t2f, h2f;         //Deklarasi untuk konversi menjadi float atau bytes
+        for(int i=startingAddress; i<(startingAddress+numberOfDevices); i++){      //Loop untuk akuisisi data dari semua sender
                 Wire.requestFrom(i, dataSize); //Alamat sender dimulai dari 8-10
                 int j=0;
                 while(Wire.available()){
@@ -33,23 +33,23 @@ void loop() {
                         j++;
                 }
 
-        t2f.b[0] = I2C_data[0];
+        t2f.b[0] = I2C_data[0];           //Data byte dimasukkan ke array union untuk dikonversi
         t2f.b[1] = I2C_data[1];
         t2f.b[2] = I2C_data[2];
         t2f.b[3] = I2C_data[3];
-        temp[i-startingAddress]=t2f.f;
+        temp[i-startingAddress]=t2f.f;    //Hasil konversi dimasukkan ke array temperatur
     
         h2f.b[0] = I2C_data[4];
         h2f.b[1] = I2C_data[5];
         h2f.b[2] = I2C_data[6];
         h2f.b[3] = I2C_data[7];
-        humid[i-startingAddress]=h2f.f;
+        humid[i-startingAddress]=h2f.f;   //Hasil konversi dimasukkan ke array humidity
         }
         Serial.println("");
 
         //TEMPERATURE
         //MEDIAN
-        Serial.print("Temp Median  = "); Serial.print(medianFunc(temp));
+        Serial.print("Temp Median  = "); Serial.print(medianFunc(temp));  
 
         //MEAN
         Serial.print("  Temp Mean  = "); Serial.print(meanFunc(temp, 3));
